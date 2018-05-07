@@ -1,25 +1,26 @@
 <?php
+session_start();
 require('conector.php');
 $con = new ConectorBD('localhost','general','1234');
+$passw=$_POST["password"];
+$email=$_POST["username"];
 
 $respuesta['conexion']= $con->initConexion('agendaphp');
 if($respuesta['conexion']="OK"){
-
-
-$consulta_usuario=$con->ejecutarQuery("SELECT * FROM usuarios WHERE username='".$_POST['username']."' AND password ='".$_POST['password']."'");
-if($consulta_usuario->num_rows>0){
-	$respuesta['acceso'] = 'concedido';
-    }else $respuesta['acceso'] = 'rechazado';
-
-$respuesta["consulta"]=$consulta_usuario->fetch_array();
-$respuesta['a']=$_POST['username'];
-$respuesta['b']=$_POST['password'];
-
-} 
-
-echo json_encode($respuesta);
+	$resul=$con->datosUsuario($email);
+	while ($rows = $resul->fetch_array()) {
+		 
+		if(password_verify($passw,$rows["password"])) {
+			$_SESSION['id'] = $rows["id"];
+			$respuesta['acceso']='concedido';
+	    	  
+	 		//echo json_encode($php_response,JSON_FORCE_OBJECT);
+		}
+		echo json_encode($respuesta,JSON_FORCE_OBJECT);
+	}
 
 $con->cerrarConexion();
 
+} 
 
  ?>
